@@ -1,3 +1,7 @@
+# spambase extra files
+spambase.documentation
+spambase.names
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
