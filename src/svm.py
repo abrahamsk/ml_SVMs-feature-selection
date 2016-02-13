@@ -8,24 +8,29 @@
 # 2/16/16
 
 from sklearn import svm
+from input import *
 from hw3tools import *
 
-# test
+# As other classifiers, SVC, NuSVC and LinearSVC take as input two arrays:
+# an array X of size [n_samples, n_features] holding the training samples,
+# and an array y of class labels (strings or integers), size [n_samples]:
 X = [[0, 0], [1, 1]]
-y = [0, 1]
-clf = svm.SVC()
-clf.fit(X, y)
+y = [0, 1] # last column of input
+# clf = svm.LinearSVC(C=.1)
+clf = svm.SVC(C=.1, kernel='linear')
+clf.fit(X_scaled, X_col)
 print clf
 
 # Use TA's written tools
-features, labels = LoadSpamData()
-BalanceDataset(features, labels)
-# shuffle data
-# split into test and training
-# call for both training and test data
-features, labels = ConvertDataToArrays(features, labels)
-features = NormalizeFeatures(features)
-PrintDataToSvmLightFormat(features, labels)
+# main()
+# features, labels = LoadSpamData()
+# BalanceDataset(features, labels)
+# # shuffle data
+# # split into test and training
+# # call for both training and test data
+# features, labels = ConvertDataToArrays(features, labels)
+# features = NormalizeFeatures(features)
+# PrintDataToSvmLightFormat(features, labels)
 
 # run SVMlight with
 # HAL:src katieabrahams$ ./svm_learn spambase.data
