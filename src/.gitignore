@@ -4,6 +4,7 @@ spambase.names
 
 # idea files
 .idea/
+.idea/dictionaries
 
 .DS_Store
 
