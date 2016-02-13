@@ -1,6 +1,7 @@
 # spambase extra files
 spambase.documentation
 spambase.names
+spambase.data
 
 # idea files
 .idea/
