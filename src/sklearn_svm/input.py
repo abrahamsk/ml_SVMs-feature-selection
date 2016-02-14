@@ -11,7 +11,7 @@ import pandas as pd
 from sklearn import preprocessing
 import numpy as np
 
-df = pd.read_csv('spambase.data', header=None)
+df = pd.read_csv('spambase/spambase.data', header=None)
 # print df  #[4601 rows x 58 columns]
 # df.to_csv("df.csv")
 
@@ -79,7 +79,7 @@ X_col = X[:,57]
 # print X_col[None].T.shape  # (1810, 1)
 X_concat = np.concatenate((X_scaled, X_col[None].T), axis=1)
 # print X_concat.shape  # (1810, 58)
-np.savetxt("numpy_train.csv", X_concat, delimiter=",")
+np.savetxt("sklearn_svm/numpy_train.csv", X_concat, delimiter=",")
 
 # Scale test data using standardization parameters from training data
 X_test = df_test.as_matrix().astype(np.float)
@@ -88,7 +88,7 @@ X_test_to_scale = X_test[:,:57].copy()
 X_test_scaled = scaler.fit_transform(X_test_to_scale)
 X_test_col = X_test[:,57]
 X_test_concat = np.concatenate((X_test_scaled, X_test_col[None].T), axis=1)
-np.savetxt("numpy_test.csv", X_test_concat, delimiter=",")
+np.savetxt("sklearn_svm/numpy_test.csv", X_test_concat, delimiter=",")
 
 
 

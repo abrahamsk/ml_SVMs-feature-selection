@@ -1,7 +1,7 @@
 # spambase files
-spambase.data
-spambase.documentation
-spambase.names
+spambase/spambase.data
+spambase/spambase.documentation
+spambase/spambase.names
 
 # idea files
 .idea/

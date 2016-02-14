@@ -91,7 +91,7 @@ def NormalizeFeatures(features):
 def PrintDataToSvmLightFormat(features, labels, filename="svm_features.data"):
     """
     Readable format for SVM Light should be, with
-    lable 0:feature0, 1:feature1, 2:feature2, etc...
+    label 0:feature0, 1:feature1, 2:feature2, etc...
     where label is -1 or 1.
     """
 
@@ -130,11 +130,6 @@ def main():
     # feature is a list of lists, label is a list
     # must first reattach labels to features
     # append label to feature by index
-    # bar = []
-    # for item in some_iterable:
-    # bar.append(SOME EXPRESSION)
-    #
-    # bar = [SOME EXPRESSION for item in some_iterable]
     for i in range(len(features)):
         features[i].append(labels[i])
 
