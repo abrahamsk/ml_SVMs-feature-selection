@@ -5,11 +5,11 @@
 # HW 3: SVMs and Feature Selection
 # Katie Abrahams, abrahake@pdx.edu
 # 2/16/16
-
+from __future__ import division  # float division
 from input import *
-from sklearn.cross_validation import KFold
 import sys
-from sklearn import svm
+from sklearn import svm, cross_validation, metrics
+from sklearn.metrics import recall_score, accuracy_score, roc_curve, auc
 
 ###########################################################################
 # Experiment 1:
@@ -30,8 +30,9 @@ from sklearn import svm
 # 7) – Use results on test data to create an ROC curve for this SVM,
 #   using about 200 evenly spaced thresholds.
 ###########################################################################
+zero = (.1 * 10**-100)
 
-c_params = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
+c_params = [zero, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
 # 1) Split training data
 validation_set = []
 validation_set_classification = []
@@ -47,11 +48,6 @@ validation_set.append(X_scaled[0:181])
 validation_set_classification.append(X_col[0:181])
 training_set.append(X_scaled[181:])
 training_set_classifications.append(X_col[181:])
-np.savetxt("sklearn_svm/training_data/validation_set_0.csv", validation_set[0], delimiter=",")
-np.savetxt("sklearn_svm/training_data/validation_set_classification_0.csv", validation_set_classification[0], delimiter=",")
-np.savetxt("sklearn_svm/training_data/training_set_0.csv", training_set[0], delimiter=",")
-np.savetxt("sklearn_svm/training_data/training_set_classifications_0.csv", training_set_classifications[0], delimiter=",")
-
 # 1
 validation_set.append(X_scaled[181:362])
 validation_set_classification.append(X_col[181:362])
@@ -101,14 +97,47 @@ training_set_classifications.append(X_col[0:1629])
 ###########################################################################
 
 # 2)  For each value of the C parameter j:
+# store avg accuracies to compute the best
+avg_accuracy = []
 for j in c_params:
+    accuracy = []
     for i in xrange(10):
         # Select Si to be the validation set: validation_set[i]
         # Train linear SVM using C=j and all training data except Si.
-        clf = svm.SVC(C=0.1, kernel='linear')
+        clf = svm.SVC(C=j, kernel='linear')
+        # fit the SVM model according to the given training data.  fit() returns self.
         clf.fit(training_set[i], training_set_classifications[i].ravel())
+        accuracy.append(clf.score(validation_set[i], validation_set_classification[i]))
         text = "\rc_params "+str((j))#+"\r xrange "+str((i)+1)
         sys.stdout.write(text)
+    # 3) Compute average accuracy for C=j
+    avg_accuracy.append(sum(accuracy) / len(accuracy))
+# 4) Choose value C=C* that results in highest Aj
+winner = max(avg_accuracy)
+winner_index = avg_accuracy.index(winner)
+
+# 5) Train new linear SVM using all training data with C=C*
+print "\nTraining new linear SVM on all training data using C*..."
+model = svm.SVC(C=winner, kernel='linear')
+# Fit the SVM model according to the given training data.
+model.fit(X_scaled, X_col)
+print "done!"
+
+# 6) Test learned SVM model on test data. Report accuracy, precision, and recall
+# (using threshold 0 to determine positive and negative classifications)
+print "Testing learned SVM... "
+# return the mean accuracy on the given test data and labels
+acc = model.score(X_test_scaled, X_test_col)
+# Predict class labels for samples in X_test_scaled.
+predicted = model.predict(X_test_scaled)
+print "done!"
+print "----- Exp 1 Accuracy -----\n",acc,"\n--------------------------"
+
+# Performance metrics
+# Returns text summary of the precision, recall, F1 score for each class
+print "Classification report for %s" % model
+print metrics.classification_report(X_test_col, predicted)
+
 
 ###########################################################################
 
