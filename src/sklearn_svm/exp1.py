@@ -10,6 +10,12 @@ from input import *
 import sys
 from sklearn import svm, cross_validation, metrics
 from sklearn.metrics import recall_score, accuracy_score, roc_curve, auc
+# ROC curve:
+import matplotlib.pyplot as plot
+from sklearn.cross_validation import train_test_split
+from sklearn.preprocessing import label_binarize
+from sklearn.multiclass import OneVsRestClassifier
+from scipy import interp
 
 ###########################################################################
 # Experiment 1:
@@ -94,7 +100,7 @@ validation_set_classification.append(X_col[1629:1810])
 training_set.append(X_scaled[0:1629])
 training_set_classifications.append(X_col[0:1629])
 
-###########################################################################
+##########################################################################################################
 
 # 2)  For each value of the C parameter j:
 # store avg accuracies to compute the best
@@ -108,7 +114,7 @@ for j in c_params:
         # fit the SVM model according to the given training data.  fit() returns self.
         clf.fit(training_set[i], training_set_classifications[i].ravel())
         accuracy.append(clf.score(validation_set[i], validation_set_classification[i]))
-        text = "\rc_params "+str((j))#+"\r xrange "+str((i)+1)
+        text = "\rC parameter: "+str((j))#+"\r xrange "+str((i)+1)
         sys.stdout.write(text)
     # 3) Compute average accuracy for C=j
     avg_accuracy.append(sum(accuracy) / len(accuracy))
@@ -126,38 +132,120 @@ print "done!"
 # 6) Test learned SVM model on test data. Report accuracy, precision, and recall
 # (using threshold 0 to determine positive and negative classifications)
 print "Testing learned SVM... "
+# score(X, y): X Test samples, y True labels for X
+# Returns: Mean accuracy of self.predict(X) wrt. y
 # return the mean accuracy on the given test data and labels
 acc = model.score(X_test_scaled, X_test_col)
 # Predict class labels for samples in X_test_scaled.
 predicted = model.predict(X_test_scaled)
 print "done!"
-print "----- Exp 1 Accuracy -----\n",acc,"\n--------------------------"
 
-# Performance metrics
-# Returns text summary of the precision, recall, F1 score for each class
-print "Classification report for %s" % model
-print metrics.classification_report(X_test_col, predicted)
+def print_stats():
+    """
+    Print stats about experiment 1 data
+    :return nothing, but print stats:
+    """
+    print "----- Exp 1 Accuracy -----\n",acc,"\n--------------------------"
+
+    # Performance metrics
+    # Returns text summary of the precision, recall, F1 score for each class
+    target_names = ['Not spam', 'Spam']
+    print "Classification report for %s" % model
+    print metrics.classification_report(X_test_col, predicted, target_names=target_names)
+
+    print "Confusion matrix:"
+    print metrics.confusion_matrix(X_test_col, predicted)
+
+##########################################################################################################
+
+# 7) ROC Curve
+# sourced from:
+# scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html#example-model-selection-plot-roc-py
+def plot_roc():
+    """
+    Plot ROC curve for experiment 1
+    :return nothing, but Python displays a plotted curve:
+    """
+    data = np.concatenate((X_scaled, X_test_scaled), axis=0)
+    classifications = np.concatenate((X_col[:, None], X_test_col[:, None]), axis=0)
+
+    # Binarize the output
+    classifications = label_binarize(classifications, classes=[0, 1])
+    n_classes = classifications.shape[1]
+
+    # shuffle and split training and test sets
+    X_train, X_test, y_train, y_test = train_test_split(data, classifications, test_size=.5, random_state=0)
+    # Learn to predict each class against the other
+    # Fit one classifier per class. For each classifier, the class is fitted against all the other classes.
+    classifier = OneVsRestClassifier(svm.SVC(C=winner, kernel='linear', probability=True))
+    # Fit the model according to the given training data
+    # Predict confidence scores for samples:
+    # The confidence score for a sample is the signed distance of that sample to the hyperplane
+    # Returns:
+    # Confidence scores per (sample, class) combination. In the binary case, confidence score for
+    # self.classes_[1] where >0 means this class would be predicted
+    y_score = classifier.fit(X_train, y_train).decision_function(X_test)
+
+    # Compute ROC curve and ROC area for each class
+    false_pos_rate = dict()
+    true_pos_rate = dict()
+    roc_auc = dict()
+    for i in range(n_classes):
+        false_pos_rate[i], true_pos_rate[i], _ = roc_curve(y_test[:, i], y_score[:, i])
+        roc_auc[i] = auc(false_pos_rate[i], true_pos_rate[i])
+
+    # Compute micro-average ROC curve and ROC area
+    false_pos_rate["micro"], true_pos_rate["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
+    roc_auc["micro"] = auc(false_pos_rate["micro"], true_pos_rate["micro"])
 
 
-###########################################################################
+    ################################################
+    # Plot ROC curves for multiclass
+    # Compute macro-average ROC curve and ROC area
+    # macro-averaging gives equal weight to the classification of each label
 
+    # Aggregate all false positive rates
+    all_false_pos_rate = np.unique(np.concatenate([false_pos_rate[i] for i in range(n_classes)]))
 
-# from sklearn.cross_validation import train_test_split
-#
-# data, labels = np.arange(10).reshape((5, 2)), range(5)
-#
-# data_train, data_test, labels_train, labels_test = train_test_split(X_scaled, X_col, test_size=0.10)
-# print data_train.shape
+    # Interpolate all ROC curves at this points
+    mean_true_pos_rate = np.zeros_like(all_false_pos_rate)
+    for i in range(n_classes):
+        mean_true_pos_rate += interp(all_false_pos_rate, false_pos_rate[i], true_pos_rate[i])
 
+    # Average and compute AUC
+    mean_true_pos_rate /= n_classes
+    false_pos_rate["macro"] = all_false_pos_rate
+    true_pos_rate["macro"] = mean_true_pos_rate
+    roc_auc["macro"] = auc(false_pos_rate["macro"], true_pos_rate["macro"])
 
-# 1810 rows/10 = 181 rows per disjoint set
-# sklearn.cross_validation.KFold(n, n_folds=3, shuffle=False, random_state=None)
-# n: int Total number of elements
-# n_folds: int, Number of folds
-# The first n % n_folds folds have size n // n_folds + 1, other folds have size n // n_folds.
-# kf = KFold(1810, n_folds=10)
-# print len(kf)  # 10
-# print kf
-# for train, test in kf:
-#     print("%s" % (train))
+    # Plot all ROC curves
+    plot.figure()
+    plot.plot(false_pos_rate["micro"], true_pos_rate["micro"],
+              label='micro-average ROC curve (area = {0:0.2f})'''.format(roc_auc["micro"]), linewidth=2)
 
+    plot.plot(false_pos_rate["macro"], true_pos_rate["macro"],
+              label='macro-average ROC curve (area = {0:0.2f})'''.format(roc_auc["macro"]), linewidth=2)
+
+    for i in range(n_classes):
+        plot.plot(false_pos_rate[i], true_pos_rate[i], label='ROC curve of class {0} (area = {1:0.2f})'
+                                       ''.format(i, roc_auc[i]))
+
+    # Display plot
+    plot.plot([0, 1], [0, 1], 'k--')
+    plot.xlim([0.0, 1.0])
+    plot.ylim([0.0, 1.05])
+    plot.xlabel('False Positive Rate')
+    plot.ylabel('True Positive Rate')
+    plot.title('ROC (Receiver operating characteristic) curve, multi-class')
+    plot.legend(loc="lower right")
+    plot.show()
+
+##########################################################################################################
+
+# Only print exp1 stats and plot the ROC curve if exp1 is the main program
+def main():
+    print_stats()
+    plot_roc()
+
+if __name__ == "__main__":
+  main()
