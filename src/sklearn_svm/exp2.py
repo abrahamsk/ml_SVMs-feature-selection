@@ -10,7 +10,7 @@ from exp1 import model, winner
 from input import *
 import heapq
 import numpy as np
-from sklearn import svm
+from sklearn import svm, metrics
 import matplotlib.pyplot as plt
 
 ####################################################################
@@ -26,6 +26,21 @@ import matplotlib.pyplot as plt
 #   4) • Test SVMm on the test set to obtain accuracy.
 # 5) – Plot accuracy vs. m
 ####################################################################
+
+def print_stats():
+    """
+    Print stats about experiment 2 data
+    :return nothing, but print stats:
+    """
+    print "----- Exp 2 Accuracy -----\n",acc,"\nC =",winner,"\nNum features =",m,"\n--------------------------"
+
+    # Performance metrics
+    # Returns text summary of the precision, recall, F1 score for each class
+    target_names = ['Not spam', 'Spam']
+    print "Classification report for %s" % svm_m
+    print metrics.classification_report(X_test_col, predicted, target_names=target_names)
+
+############################################################################################
 
 
 # class sklearn.svm.SVC(C=1.0, kernel='rbf', degree=3, gamma='auto', ***coef0=0.0***,
@@ -70,9 +85,11 @@ for m in xrange(2, 58):
 
     # 4) Test SVMm on the test set to obtain accuracy.
     # must test using the same number of features as training
-    acc_list.append(svm_m.score(X_test_scaled[:,[i for i in indices]], X_test_col))
+    acc = svm_m.score(X_test_scaled[:,[i for i in indices]], X_test_col)
+    acc_list.append(acc)
     # Predict class labels for samples in X_test_scaled.
     predicted = svm_m.predict(X_test_scaled[:,[i for i in indices]])
+    print_stats()
 
 # 5) – Plot accuracy vs. m
 def plot():
@@ -90,6 +107,7 @@ def plot():
     plt.legend(loc="lower right")
     plt.show()
 
+############################################################################################
 
 def get_top_features():
     """
@@ -168,6 +186,7 @@ def get_top_features():
     for i in features_selected[max_index]:
         print feature_vals[i]
 
+############################################################################################
 
 # Only plot accuracy and fetch highest-accuracy features if exp2 is the main program
 if __name__ == "__main__":

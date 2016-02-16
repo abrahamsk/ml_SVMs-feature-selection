@@ -10,7 +10,7 @@ from exp1 import model, winner
 from input import *
 import heapq
 import numpy as np
-from sklearn import svm
+from sklearn import svm, metrics
 import matplotlib.pyplot as plt
 
 ##########################################################################################
@@ -20,6 +20,21 @@ import matplotlib.pyplot as plt
 #
 # Exp3 repeats much of exp2's code, with modifications for new feature selection rules.
 ##########################################################################################
+
+def print_stats():
+    """
+    Print stats about experiment 3 data
+    :return nothing, but print stats:
+    """
+    print "----- Exp 3 Accuracy -----\n",acc,"\nC =",winner,"\nNum features =",m,"\n--------------------------"
+
+    # Performance metrics
+    # Returns text summary of the precision, recall, F1 score for each class
+    target_names = ['Not spam', 'Spam']
+    print "Classification report for %s" % svm_m
+    print metrics.classification_report(X_test_col, predicted, target_names=target_names)
+
+############################################################################################
 
 # 1) Obtain weight vector w from final SVM model from exp 1
 # get absolute values for weights
@@ -46,9 +61,11 @@ for m in xrange(2, 58):
 
     # 4) Test SVMm on the test set to obtain accuracy.
     # must test using the same number of features as training
-    acc_list.append(svm_m.score(X_test_scaled[:,[i for i in indices]], X_test_col))
+    acc = svm_m.score(X_test_scaled[:,[i for i in indices]], X_test_col)
+    acc_list.append(acc)
     # Predict class labels for samples in X_test_scaled.
     predicted = svm_m.predict(X_test_scaled[:,[i for i in indices]])
+    print_stats()
 
 # 5) – Plot accuracy vs. m
 def plot():
