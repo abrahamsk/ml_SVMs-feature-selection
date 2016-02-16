@@ -196,7 +196,6 @@ def plot_roc():
         false_pos_rate[i], true_pos_rate[i], _ = roc_curve(y_test[:, i], y_score[:, i])
         roc_auc[i] = auc(false_pos_rate[i], true_pos_rate[i])
 
-    # Plot ROC curves
     # Compute macro-average ROC curve and ROC area
     # macro-averaging gives equal weight to the classification of each label
 

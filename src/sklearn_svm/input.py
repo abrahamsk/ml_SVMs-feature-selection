@@ -11,6 +11,7 @@ import pandas as pd
 from sklearn import preprocessing
 import numpy as np
 
+# read in spambase data to a pandas dataframe
 df = pd.read_csv('/Users/katieabrahams/PycharmProjects/machinelearningHW3/src/spambase/spambase.data', header=None)
 
 # Create a subset of the data that has equal numbers of positive and negative examples (1813 each of pos/neg) #
@@ -54,7 +55,8 @@ X_to_scale = X[:,:57].copy()
 X_scaled = scaler.fit_transform(X_to_scale)
 X_col = X[:,57]
 X_concat = np.concatenate((X_scaled, X_col[None].T), axis=1)
-np.savetxt("/Users/katieabrahams/PycharmProjects/machinelearningHW3/src/sklearn_svm/numpy_train.csv", X_concat, delimiter=",")
+np.savetxt("/Users/katieabrahams/PycharmProjects/machinelearningHW3/src/sklearn_svm/numpy_train.csv", X_concat,
+           delimiter=",")
 
 # Scale test data using standardization parameters from training data
 X_test = df_test.as_matrix().astype(np.float)
@@ -62,7 +64,5 @@ X_test_to_scale = X_test[:,:57].copy()
 X_test_scaled = scaler.fit_transform(X_test_to_scale)
 X_test_col = X_test[:,57]
 X_test_concat = np.concatenate((X_test_scaled, X_test_col[None].T), axis=1)
-np.savetxt("/Users/katieabrahams/PycharmProjects/machinelearningHW3/src/sklearn_svm/numpy_test.csv", X_test_concat, delimiter=",")
-
-
-
+np.savetxt("/Users/katieabrahams/PycharmProjects/machinelearningHW3/src/sklearn_svm/numpy_test.csv", X_test_concat,
+           delimiter=",")
