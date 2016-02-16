@@ -36,6 +36,7 @@ from scipy import interp
 # 7) – Use results on test data to create an ROC curve for this SVM,
 #   using about 200 evenly spaced thresholds.
 ###########################################################################
+# can't use 0 for sklearn svm, get a close approximate
 zero = (.1 * 10**-100)
 
 c_params = [zero, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
