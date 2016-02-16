@@ -193,11 +193,11 @@ def plot_roc():
     true_pos_rate = dict()
     roc_auc = dict()
     for i in range(n_classes):
-        false_pos_rate[i], true_pos_rate[i], _ = roc_curve(y_test[:, i], y_score[:, i])
+        false_pos_rate[i], true_pos_rate[i], threshold = roc_curve(y_test[:, i], y_score[:, i])
         roc_auc[i] = auc(false_pos_rate[i], true_pos_rate[i])
 
-    print "Thresholds", _
-    print "Num thresholds", len(_)
+    print "Thresholds", threshold
+    print "Num thresholds", len(threshold)
 
     # Compute macro-average ROC curve and ROC area
     # macro-averaging gives equal weight to the classification of each label
