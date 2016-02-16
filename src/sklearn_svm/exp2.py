@@ -6,7 +6,9 @@
 # Katie Abrahams, abrahake@pdx.edu
 # 2/16/16
 
-from exp1 import model
+from exp1 import model, winner_index, winner
+import heapq, random
+import numpy as np
 
 #####################################################################
 # Experiment 2:
@@ -33,11 +35,40 @@ from exp1 import model
 # coef_ is a readonly property derived from dual_coef_ and support_vectors_.
 
 # 1) Obtain weight vector w from final SVM model from exp 1
-w = model._get_coef()
-# print w.shape # 1x57
+# type(model._get_coef()) is numpy.ndarray
+# w = model._get_coef()
+# get absolute values for weights
+weight_abs_values = np.absolute(model._get_coef())
+# weight_abs_values.flatten()
+# print weight_abs_values[0]
+# print type(weight_abs_values)  # <type 'numpy.ndarray'>
+# m_features = heapq.nlargest(5, range(len(weight_abs_values[0])), weight_abs_values.take)  # list
+print weight_abs_values[0].max()
+
+# get absolute values |w| and sort
+# sorted_abs_list = sorted(map(abs, w))
+# print type(sorted_abs_list)
+# for n in sorted_abs_list:
+#     sorted_abs_list.append(sorted(map(abs, n)))
+    # print type(n) # <type 'numpy.ndarray'>
+   # for m in n:
+   #     print type(m) # <type 'numpy.float64'>
+
 
 # For m = 1 to 57
-for m in xrange(57):
-    print m # 0 to 56
-# 2) Select the set of m features that have highest |wm|
+# xrange is non-inclusive on upper bound, go to 58
+for m in xrange(1, 58):
+    # 2) Select the set of m features that have highest |wm|
+    # get largest values for |wm|
+    m_features = heapq.nlargest(m, weight_abs_values[0])
+    print m_features
+    # m_features = heapq.nlargest(m, w)
+    # m_features = heapq.nlargest(m, enumerate(sorted_abs_list), key=lambda x:x[1])
+    # print m_features
 
+    # 3) Train a linear SVM, SVMm , on all the training data, only using
+    # these m features, and using C* from Experiment 1
+
+    # 4) Test SVMm on the test set to obtain accuracy.
+
+# 5) – Plot accuracy vs. m

@@ -207,7 +207,7 @@ def plot_roc():
     # Aggregate all false positive rates
     all_false_pos_rate = np.unique(np.concatenate([false_pos_rate[i] for i in range(n_classes)]))
 
-    # Interpolate all ROC curves at this points
+    # Interpolate all ROC curves at points
     mean_true_pos_rate = np.zeros_like(all_false_pos_rate)
     for i in range(n_classes):
         mean_true_pos_rate += interp(all_false_pos_rate, false_pos_rate[i], true_pos_rate[i])
@@ -234,10 +234,12 @@ def plot_roc():
     plot.plot([0, 1], [0, 1], 'k--')
     plot.xlim([0.0, 1.0])
     plot.ylim([0.0, 1.05])
+    # label x and y axes, generate title
     plot.xlabel('False Positive Rate')
     plot.ylabel('True Positive Rate')
     plot.title('ROC (Receiver operating characteristic) curve, multi-class')
     plot.legend(loc="lower right")
+    # show plotted ROC curve
     plot.show()
 
 ##########################################################################################################
