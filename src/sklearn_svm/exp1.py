@@ -119,8 +119,10 @@ for j in c_params:
     # 3) Compute average accuracy for C=j
     avg_accuracy.append(sum(accuracy) / len(accuracy))
 # 4) Choose value C=C* that results in highest Aj
-winner = max(avg_accuracy)
-winner_index = avg_accuracy.index(winner)
+winning_avg = max(avg_accuracy)
+winning_index = avg_accuracy.index(winning_avg)
+# the winning c parameter corresponds to the highest avg
+winner = c_params[winning_index]
 
 # 5) Train new linear SVM using all training data with C=C*
 print "\nTraining new linear SVM on all training data using C*..."
@@ -145,7 +147,7 @@ def print_stats():
     Print stats about experiment 1 data
     :return nothing, but print stats:
     """
-    print "----- Exp 1 Accuracy -----\n",acc,"\n--------------------------"
+    print "----- Exp 1 Accuracy -----\n",acc,"\nC =",winner,"\n--------------------------"
 
     # Performance metrics
     # Returns text summary of the precision, recall, F1 score for each class
@@ -163,7 +165,7 @@ def print_stats():
 # scikit-learn.org/stable/auto_examples/model_selection/plot_roc.html#example-model-selection-plot-roc-py
 def plot_roc():
     """
-    Plot ROC curve for experiment 1
+    Plot ROC curve for experiment 1 using the winning C value
     :return nothing, but Python displays a plotted curve:
     """
     data = np.concatenate((X_scaled, X_test_scaled), axis=0)
@@ -194,13 +196,7 @@ def plot_roc():
         false_pos_rate[i], true_pos_rate[i], _ = roc_curve(y_test[:, i], y_score[:, i])
         roc_auc[i] = auc(false_pos_rate[i], true_pos_rate[i])
 
-    # Compute micro-average ROC curve and ROC area
-    false_pos_rate["micro"], true_pos_rate["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
-    roc_auc["micro"] = auc(false_pos_rate["micro"], true_pos_rate["micro"])
-
-
-    ################################################
-    # Plot ROC curves for multiclass
+    # Plot ROC curves
     # Compute macro-average ROC curve and ROC area
     # macro-averaging gives equal weight to the classification of each label
 
@@ -218,18 +214,12 @@ def plot_roc():
     true_pos_rate["macro"] = mean_true_pos_rate
     roc_auc["macro"] = auc(false_pos_rate["macro"], true_pos_rate["macro"])
 
-    # Plot all ROC curves
+    # Plot ROC curve
     plot.figure()
-    plot.plot(false_pos_rate["micro"], true_pos_rate["micro"],
-              label='micro-average ROC curve (area = {0:0.2f})'''.format(roc_auc["micro"]), linewidth=2)
-
-    plot.plot(false_pos_rate["macro"], true_pos_rate["macro"],
-              label='macro-average ROC curve (area = {0:0.2f})'''.format(roc_auc["macro"]), linewidth=2)
 
     for i in range(n_classes):
-        plot.plot(false_pos_rate[i], true_pos_rate[i], label='ROC curve of class {0} (area = {1:0.2f})'
+        plot.plot(false_pos_rate[i], true_pos_rate[i], label='ROC curve (Area = {1:0.2f})'
                                        ''.format(i, roc_auc[i]))
-
     # Display plot
     plot.plot([0, 1], [0, 1], 'k--')
     plot.xlim([0.0, 1.0])
@@ -237,7 +227,7 @@ def plot_roc():
     # label x and y axes, generate title
     plot.xlabel('False Positive Rate')
     plot.ylabel('True Positive Rate')
-    plot.title('ROC (Receiver operating characteristic) curve, multi-class')
+    plot.title('Experiment 1 ROC curve')
     plot.legend(loc="lower right")
     # show plotted ROC curve
     plot.show()

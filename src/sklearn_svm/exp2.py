@@ -6,9 +6,13 @@
 # Katie Abrahams, abrahake@pdx.edu
 # 2/16/16
 
-from exp1 import model, winner_index, winner
-import heapq, random
+from exp1 import model, winner
+from input import *
+import heapq
 import numpy as np
+from sklearn import svm
+import matplotlib.pyplot as plot
+
 
 #####################################################################
 # Experiment 2:
@@ -35,40 +39,60 @@ import numpy as np
 # coef_ is a readonly property derived from dual_coef_ and support_vectors_.
 
 # 1) Obtain weight vector w from final SVM model from exp 1
-# type(model._get_coef()) is numpy.ndarray
-# w = model._get_coef()
 # get absolute values for weights
 weight_abs_values = np.absolute(model._get_coef())
-# weight_abs_values.flatten()
-# print weight_abs_values[0]
-# print type(weight_abs_values)  # <type 'numpy.ndarray'>
-# m_features = heapq.nlargest(5, range(len(weight_abs_values[0])), weight_abs_values.take)  # list
-print weight_abs_values[0].max()
 
-# get absolute values |w| and sort
-# sorted_abs_list = sorted(map(abs, w))
-# print type(sorted_abs_list)
-# for n in sorted_abs_list:
-#     sorted_abs_list.append(sorted(map(abs, n)))
-    # print type(n) # <type 'numpy.ndarray'>
-   # for m in n:
-   #     print type(m) # <type 'numpy.float64'>
-
-
-# For m = 1 to 57
+# to store accuracies of svm running on test data
+# using m features subset
+acc_list = []
+# For m = 2 to 57 (need to have at least 2 features for the SVM to work)
 # xrange is non-inclusive on upper bound, go to 58
-for m in xrange(1, 58):
+for m in xrange(2, 58):
     # 2) Select the set of m features that have highest |wm|
-    # get largest values for |wm|
-    m_features = heapq.nlargest(m, weight_abs_values[0])
-    print m_features
-    # m_features = heapq.nlargest(m, w)
-    # m_features = heapq.nlargest(m, enumerate(sorted_abs_list), key=lambda x:x[1])
-    # print m_features
+    # get m largest values for |wm|
+    # m_features = heapq.nlargest(m, weight_abs_values[0])
+
+    # get indices of m largest weight values
+    indices = heapq.nlargest(m, range(len(weight_abs_values[0])), weight_abs_values[0].take)
+    # get features corresponding to largest weights
+    # create numpy.ndarray for features that correspond to highest weights
+    # X_scaled_subset = []
+    # X_col_subset = []
+    # print indices
+    # for i in indices:
+    #     # use the feature vectors corresponding to the weights with the highest values
+    #     # as the new set to train the SVM
+    #     # features with highest weights:
+    #     X_scaled_subset.append(X_scaled[:,i])
+    #     # corresponding classifiers with highest weights:
+    #     X_col_subset.append(X_col[i])
+
+    # print X_scaled_subset
+    # print X_col_subset
+    X_scaled_subset = np.copy(X_scaled[:,[i for i in indices]])
+    X_col_subset = np.copy(X_col[[i for i in indices],None])
+    print X_col_subset
 
     # 3) Train a linear SVM, SVMm , on all the training data, only using
     # these m features, and using C* from Experiment 1
+    svm_m = svm.SVC(C=winner, kernel='linear')
+    # Fit the SVM model according to the given training data.
+    # svm_m.fit(X_scaled_subset, X_col_subset)
 
     # 4) Test SVMm on the test set to obtain accuracy.
 
 # 5) – Plot accuracy vs. m
+def plot():
+    """
+    Plot accuracy of SVM on test data vs. m number of features
+    :return:
+    """
+    plot.plot(range(2, 58), acc_list)
+    plot.xlim([1.0, 59.0])
+    plot.ylim([0.0, 1.05])
+    # label x and y axes, generate title
+    plot.xlabel('Number of features')
+    plot.ylabel('Accuracy of SVM (Test data)')
+    plot.title('Accuracy vs. m features')
+    plot.legend(loc="lower right")
+    plot.show()
