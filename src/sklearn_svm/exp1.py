@@ -11,7 +11,7 @@ import sys
 from sklearn import svm, cross_validation, metrics
 from sklearn.metrics import recall_score, accuracy_score, roc_curve, auc
 # ROC curve:
-import matplotlib.pyplot as plot
+import matplotlib.pyplot as plt
 from sklearn.cross_validation import train_test_split
 from sklearn.preprocessing import label_binarize
 from sklearn.multiclass import OneVsRestClassifier
@@ -215,22 +215,22 @@ def plot_roc():
     roc_auc["macro"] = auc(false_pos_rate["macro"], true_pos_rate["macro"])
 
     # Plot ROC curve
-    plot.figure()
+    plt.figure()
 
     for i in range(n_classes):
-        plot.plot(false_pos_rate[i], true_pos_rate[i], label='ROC curve (Area = {1:0.2f})'
+        plt.plot(false_pos_rate[i], true_pos_rate[i], label='ROC curve (Area = {1:0.2f})'
                                        ''.format(i, roc_auc[i]))
     # Display plot
-    plot.plot([0, 1], [0, 1], 'k--')
-    plot.xlim([0.0, 1.0])
-    plot.ylim([0.0, 1.05])
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
     # label x and y axes, generate title
-    plot.xlabel('False Positive Rate')
-    plot.ylabel('True Positive Rate')
-    plot.title('Experiment 1 ROC curve')
-    plot.legend(loc="lower right")
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Experiment 1 ROC curve')
+    plt.legend(loc="lower right")
     # show plotted ROC curve
-    plot.show()
+    plt.show()
 
 ##########################################################################################################
 

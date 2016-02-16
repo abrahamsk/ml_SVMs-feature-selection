@@ -11,7 +11,7 @@ from input import *
 import heapq
 import numpy as np
 from sklearn import svm
-import matplotlib.pyplot as plot
+import matplotlib.pyplot as plt
 
 
 #####################################################################
@@ -50,36 +50,24 @@ acc_list = []
 for m in xrange(2, 58):
     # 2) Select the set of m features that have highest |wm|
     # get m largest values for |wm|
-    # m_features = heapq.nlargest(m, weight_abs_values[0])
 
     # get indices of m largest weight values
     indices = heapq.nlargest(m, range(len(weight_abs_values[0])), weight_abs_values[0].take)
     # get features corresponding to largest weights
-    # create numpy.ndarray for features that correspond to highest weights
-    # X_scaled_subset = []
-    # X_col_subset = []
-    # print indices
-    # for i in indices:
-    #     # use the feature vectors corresponding to the weights with the highest values
-    #     # as the new set to train the SVM
-    #     # features with highest weights:
-    #     X_scaled_subset.append(X_scaled[:,i])
-    #     # corresponding classifiers with highest weights:
-    #     X_col_subset.append(X_col[i])
-
-    # print X_scaled_subset
-    # print X_col_subset
     X_scaled_subset = np.copy(X_scaled[:,[i for i in indices]])
-    X_col_subset = np.copy(X_col[[i for i in indices],None])
-    print X_col_subset
+    # X_col_subset = np.copy(X_col[[i for i in indices],None])
 
     # 3) Train a linear SVM, SVMm , on all the training data, only using
     # these m features, and using C* from Experiment 1
     svm_m = svm.SVC(C=winner, kernel='linear')
-    # Fit the SVM model according to the given training data.
-    # svm_m.fit(X_scaled_subset, X_col_subset)
+    # Fit the SVM model according to the given training data subset (m features)
+    svm_m.fit(X_scaled_subset, X_col.ravel())
 
     # 4) Test SVMm on the test set to obtain accuracy.
+    # must test using the same number of features as training
+    acc_list.append(svm_m.score(X_test_scaled[:,[i for i in indices]], X_test_col))
+    # Predict class labels for samples in X_test_scaled.
+    predicted = svm_m.predict(X_test_scaled[:,[i for i in indices]])
 
 # 5) – Plot accuracy vs. m
 def plot():
@@ -87,12 +75,16 @@ def plot():
     Plot accuracy of SVM on test data vs. m number of features
     :return:
     """
-    plot.plot(range(2, 58), acc_list)
-    plot.xlim([1.0, 59.0])
-    plot.ylim([0.0, 1.05])
+    plt.plot(range(2, 58), acc_list, label='Accuracy')
+    plt.xlim([1.0, 59.0])
+    plt.ylim([0.0, 1.05])
     # label x and y axes, generate title
-    plot.xlabel('Number of features')
-    plot.ylabel('Accuracy of SVM (Test data)')
-    plot.title('Accuracy vs. m features')
-    plot.legend(loc="lower right")
-    plot.show()
+    plt.xlabel('Number of features')
+    plt.ylabel('Accuracy of SVM (Test data)')
+    plt.title('Accuracy vs. m features')
+    plt.legend(loc="lower right")
+    plt.show()
+
+# Only plot accuracy if exp2 is the main program
+if __name__ == "__main__":
+  plot()
